@@ -5,8 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.connect.board.dto.RestaurentRepository;
 import com.connect.board.model.Restaurent;
+import com.connect.board.repo.RestaurentRepository;
 import com.connect.board.service.RestaurentService;
 
 @Service

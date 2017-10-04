@@ -1,4 +1,4 @@
-package com.connect.board.dto;
+package com.connect.board.repo;
 
 import java.util.List;
 
