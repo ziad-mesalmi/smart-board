@@ -14,13 +14,14 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;  
 import org.springframework.stereotype.Service;
 
-import com.connect.board.repo.UserRepository;
+import com.connect.board.model.Utilisateur;
+import com.connect.board.repo.UtilisateurRepository;
 
 @Service
 public class MongoDBAuthenticationProvider extends AbstractUserDetailsAuthenticationProvider {
 
 	@Autowired
-	private UserRepository users;
+	private UtilisateurRepository users;
 
 	@Override
 	protected void additionalAuthenticationChecks(UserDetails userDetails, UsernamePasswordAuthenticationToken authenticationToken)
@@ -33,17 +34,13 @@ public class MongoDBAuthenticationProvider extends AbstractUserDetailsAuthentica
 			throws AuthenticationException {
 		UserDetails loadedUser;
 		try {
-			com.connect.board.model.User user = users.findByUsername(username);
-			if(user == null) {
-				throw new InternalAuthenticationServiceException("Utilisatateur non existant"); 
-			}
-			if(!user.getPassword().equals(credentiel.getCredentials())) {
-				throw new InternalAuthenticationServiceException("Mot de passe incorrect"); 
-			}
+			Optional<Utilisateur> user = Optional.ofNullable(users.findByUsername(username));
+			user.orElseThrow(() -> new InternalAuthenticationServiceException("Utilisatateur non existant"));
+			user.filter(u -> u.getPassword().equals(credentiel.getCredentials())).orElseThrow(() -> new InternalAuthenticationServiceException("Mot de passe incorrect"));
 			List<GrantedAuthority> roles = new ArrayList<GrantedAuthority>();
-			GrantedAuthority authority = () -> user.getRole();
+			GrantedAuthority authority = () -> user.get().getRole();
 			roles.add(authority);
-			loadedUser = new User(user.getUsername(), user.getPassword(), roles);
+			loadedUser = new User(user.get().getUsername(), user.get().getPassword(), roles);
 		} catch (Exception repositoryProblem) {
 			throw new InternalAuthenticationServiceException(repositoryProblem.getMessage(), repositoryProblem);
 		}
